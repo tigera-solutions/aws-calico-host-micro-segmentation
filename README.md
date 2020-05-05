@@ -166,6 +166,7 @@ sudo ./install-hms.sh
 sudo cp calico-felix /etc/default/
 sudo cp calico-felix.service /etc/systemd/system/
 sudo service calico-felix start
+sudo service calico-felix status
 ```
 
 6. Register instance with control plane
