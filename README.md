@@ -155,6 +155,7 @@ ssh -l ubuntu $IP "sed -i "s/ACCOUNTID/$ACCOUNTID/g" aws-calico-host-micro-segme
 4. Install HMS
 
 ```
+ssh -l ubuntu $IP
 cd aws-calico-host-micro-segmentation/
 sudo ./install-hms.sh
 ```
