@@ -148,16 +148,14 @@ IP=$(aws ec2 describe-instances \
   --filter "Name=tag:k8s-app,Values=calico-hms" \
   --query "Reservations[*].Instances[*].[PublicIpAddress]" \
   --output text)
-ssh -l ubuntu $IP
-git clone https://github.com/tigera-solutions/aws-calico-host-micro-segmentation.git
+ssh -l ubuntu $IP git clone https://github.com/tigera-solutions/aws-calico-host-micro-segmentation.git
+ssh -l ubuntu $IP "sed -i "s/ACCOUNTID/$ACCOUNTID/g" aws-calico-host-micro-segmentation/install-hms.sh"
 ```
 
 4. Install HMS
 
 ```
 cd aws-calico-host-micro-segmentation/
-ACCOUNTID=$(aws sts get-caller-identity --output text --query 'Account')
-sed -i "s/ACCOUNTID/$ACCOUNTID/g" install-hms.sh
 sudo ./install-hms.sh
 ```
 
