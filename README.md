@@ -103,6 +103,12 @@ kubectl apply -f https://raw.githubusercontent.com/aws/amazon-vpc-cni-k8s/releas
 kubectl get pods --all-namespaces --watch
 ```
 
+2. Assign `calico-hms` RBAC user the `calico-node` ClusterRole
+
+```
+kubectl apply -f calico-hms-clusterrolebinding.yaml
+```
+
 ### Deploy Calico Host Micro-segmentation Protection
 
 #### Launch a Calico Host Micro-segmentation stack into the Amazon VPC infrastructure using CloudFormation
@@ -126,43 +132,86 @@ aws cloudformation deploy \
       NodeCount=1
 ```
 
+2. Find the ec2 instance public ip address for the node
+
+```
+aws ec2 describe-instances \
+  --filter "Name=tag:k8s-app,Values=calico-hms" \
+  --query "Reservations[*].Instances[*].[PublicIpAddress, Tags[?Key=='Name'].Value|[0]]" \
+  --output text
+```
+
+3. Copy the installation files to the instance
+
+```
+IP=$(aws ec2 describe-instances \
+  --filter "Name=tag:k8s-app,Values=calico-hms" \
+  --query "Reservations[*].Instances[*].[PublicIpAddress]" \
+  --output text)
+ssh -l ubuntu $IP
+git clone https://github.com/tigera-solutions/aws-calico-host-micro-segmentation.git
+```
+
+4. Install HMS
+
+```
+cd aws-calico-host-micro-segmentation/
+ACCOUNTID=$(aws sts get-caller-identity --output text --query 'Account')
+sed -i "s/ACCOUNTID/$ACCOUNTID/g" install-hms.sh
+sudo ./install-hms.sh
+```
+
+5. Configure HMS
+
+```
+sudo cp calico-felix /etc/default/
+sudo cp calico-felix.service /etc/systemd/system/
+sudo service calico-felix start
+```
+
+6. Register instance with control plane
+
+```
+sudo calicoctl get heps
+HOSTIP=$(hostname -i)
+sed -i "s/HOSTIP/$HOSTIP/g" hep.yaml
+sudo calicoctl apply -f hep.yaml
+sudo calicoctl get heps -o yaml
+```
+
 #### Configure Calico Host Micro-segmentation 
 
 
 ### Simple Calico Host Micro-segmentation Protection network policy example
 
-1.  Inspect the network policies
+1. Try and ping the ec2 instance public IP address
 
 ```
-calicoctl get networkpolicies --all-namespaces
+export AWS_DEFAULT_REGION=us-east-1
+IP=$(aws ec2 describe-instances \
+  --filter "Name=tag:k8s-app,Values=calico-hms" \
+  --query "Reservations[*].Instances[*].[PublicIpAddress]" \
+  --output text)
+ping $IP
 ```
 
-```
-NAMESPACE   NAME
+2. Deploy the example host micro-segmentation globalnetworkpolicy and globalnetworkset
 
 ```
-
-2.  Inspect the global network policies
-
-```
-calicoctl get globalnetworkpolicies
-```
-
-```
-NAME
-
-```
-
-3. Deploy the example segmentation policies
-
-```
-calicoctl apply -f .yaml
+sudo calicoctl get globalnetworkpolicies
+sudo calicoctl get globalnetworksets
+sudo calicoctl apply -f attendee-globalnetworkpolicy.yaml
+sudo calicoctl apply -f attendee-globalnetworkset.yaml
+sudo calicoctl get globalnetworkpolicies -o yaml
+sudo calicoctl get globalnetworksets -o yaml
 ```
 
 4. Verify the segmentation policies
 
 ```
-calicoctl get networkpolicies --all-namespaces
+tail -f /var/log/kern.log
+curl http://$IP
+curl -k https://$IP
 ```
 
 ## References
