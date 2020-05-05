@@ -11,4 +11,4 @@ spec:
   node: calico-demo-hms-node
   interfaceName: ens5
   expectedIPs:
-  - 10.0.1.187
+  - IP
