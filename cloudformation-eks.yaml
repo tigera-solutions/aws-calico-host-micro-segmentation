@@ -1,0 +1,107 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Deploys a EKS cluster into a base networking environment
+
+Parameters:
+
+  EnvironmentName:
+    Type: String
+    Description: An environment name that will be prefixed to resource names and outputs
+
+  KeyName:
+    Description: The EC2 Key Pair to allow SSH access to the instances
+    Type: AWS::EC2::KeyPair::KeyName
+
+  ImageId:
+    Description: AMI id for the node instances.
+    Type: AWS::EC2::Image::Id
+
+  InstanceType:
+    Description: EC2 instance type for the node instances
+    Type: String
+
+  WorkerNodeCount:
+    Description: Number of worker node instances
+    Default: 2
+    Type: String
+
+  KubernetesVersion:
+    Description: The desired Kubernetes version for your cluster
+    Default: "1.16"
+    Type: String
+
+  BootstrapArguments:
+    Description: Arguments to pass to the bootstrap script. See files/bootstrap.sh in https://github.com/awslabs/amazon-eks-ami
+    Default: ""
+    Type: String
+
+Resources:
+
+  EKSCluster:
+    Type: AWS::EKS::Cluster
+    Properties:
+      Name: !Sub "${AWS::StackName}"
+      Version: !Ref KubernetesVersion
+      RoleArn:
+        Fn::ImportValue: !Sub "${EnvironmentName}:EKSServiceRoleArn"
+      ResourcesVpcConfig:
+        SecurityGroupIds:
+          - Fn::ImportValue: !Sub "${EnvironmentName}:EKSClusterControlPlaneSecurityGroup"
+        SubnetIds:
+          - Fn::ImportValue: !Sub "${EnvironmentName}:PublicSubnet0"
+          - Fn::ImportValue: !Sub "${EnvironmentName}:PublicSubnet1"
+          - Fn::ImportValue: !Sub "${EnvironmentName}:PublicSubnet2"
+
+  NodeGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    DependsOn: EKSCluster
+    Properties:
+      AutoScalingGroupName: !Sub "${AWS::StackName}-asg"
+      DesiredCapacity: !Ref WorkerNodeCount
+      LaunchConfigurationName: !Ref NodeLaunchConfig
+      MinSize: 0
+      MaxSize: 15
+      VPCZoneIdentifier:
+        - Fn::ImportValue: !Sub "${EnvironmentName}:PublicSubnet0"
+        - Fn::ImportValue: !Sub "${EnvironmentName}:PublicSubnet1"
+        - Fn::ImportValue: !Sub "${EnvironmentName}:PublicSubnet2"
+      Tags:
+      - Key: Name
+        Value: !Sub "${AWS::StackName}-worker-node"
+        PropagateAtLaunch: 'true'
+      - Key: !Sub "kubernetes.io/cluster/${AWS::StackName}"
+        Value: 'owned'
+        PropagateAtLaunch: 'true'
+    UpdatePolicy:
+      AutoScalingRollingUpdate:
+        MinInstancesInService: '1'
+        MaxBatchSize: '1'
+
+  NodeLaunchConfig:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    DependsOn: EKSCluster
+    Properties:
+      AssociatePublicIpAddress: 'true'
+      IamInstanceProfile:
+        Fn::ImportValue: !Sub "${EnvironmentName}:K8sNodeInstanceProfileArn"
+      ImageId: !Ref ImageId
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref KeyName
+      SecurityGroups:
+        - Fn::ImportValue: !Sub "${EnvironmentName}:EKSNodeSecurityGroup"
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: 100
+            VolumeType: gp2
+            DeleteOnTermination: true
+      UserData:
+        Fn::Base64:
+          !Sub |
+            #!/bin/bash
+            set -o xtrace
+            /etc/eks/bootstrap.sh ${AWS::StackName} ${BootstrapArguments}
+            /opt/aws/bin/cfn-signal --exit-code $? \
+                     --stack ${AWS::StackName} \
+                     --resource NodeGroup \
+                     --region ${AWS::Region}

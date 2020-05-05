@@ -1,0 +1,9 @@
+apiVersion: projectcalico.org/v3
+kind: GlobalNetworkSet
+metadata:
+  name: attendees
+  labels:
+    attendee: present
+spec:
+  nets:
+  - 71.191.45.77/32

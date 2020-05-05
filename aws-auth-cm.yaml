@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aws-auth
+  namespace: kube-system
+data:
+  mapRoles: |
+    - rolearn: arn:aws:iam::ACCOUNTID:role/calico-demo-K8sNodeInstanceRole
+      username: system:node:{{EC2PrivateDNSName}}
+      groups:
+        - system:bootstrappers
+        - system:nodes
+    - rolearn: arn:aws:iam::ACCOUNTID:role/calico-demo-CalicoHMSNodeInstanceRole
+      username: calico-hms
+      groups:
+        - calico-node

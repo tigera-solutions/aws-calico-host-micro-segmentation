@@ -1,0 +1,14 @@
+apiVersion: projectcalico.org/v3
+kind: HostEndpoint
+metadata:
+  name: calico-demo-hms-node
+  labels:
+    region: us-east-1
+    environment_type: aws
+    platform_type: vm
+    k8s-app: calico-hms
+spec:
+  node: calico-demo-hms-node
+  interfaceName: ens5
+  expectedIPs:
+  - 10.0.1.187

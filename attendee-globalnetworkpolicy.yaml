@@ -1,0 +1,40 @@
+apiVersion: projectcalico.org/v3
+kind: GlobalNetworkPolicy
+metadata:
+  name: allow-attendees
+spec:
+  selector: (environment_type == "aws" && platform_type == "vm")
+  namespaceSelector: ''
+  serviceAccountSelector: ''
+  ingress:
+    - action: Log
+      protocol: ICMP
+      source:
+        selector: attendee == "present"
+      destination: {}
+    - action: Allow
+      protocol: ICMP
+      source:
+        selector: attendee == "present"
+      destination: {}
+    - action: Log
+      protocol: TCP
+      source:
+        selector: attendee == "present"
+      destination:
+        ports:
+          - '80'
+          - '443'
+    - action: Allow
+      protocol: TCP
+      source:
+        selector: attendee == "present"
+      destination:
+        ports:
+          - '80'
+          - '443'
+  doNotTrack: false
+  applyOnForward: true
+  preDNAT: true
+  types:
+    - Ingress
