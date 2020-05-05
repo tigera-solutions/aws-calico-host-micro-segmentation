@@ -50,7 +50,7 @@ The base networking environment consists of a VPC with IPv4 and IPv6 addressing 
 
 1. Launch an Amazon EKS stack into the Amazon VPC infrastructure using CloudFormation
 
-Ensure the Amazon EKS-optimized Linux AMI(https://docs.aws.amazon.com/eks/latest/userguide/eks-optimized-ami.html) for your worker nodes exist in the AWS region you've chosen and also make sure the `KeyName` for the AWS Key Pair exists.
+Ensure the [Amazon EKS-optimized Linux AMI](https://docs.aws.amazon.com/eks/latest/userguide/eks-optimized-ami.html) for your worker nodes exist in the AWS region you've chosen and also make sure the `KeyName` for the AWS Key Pair exists.
 
 ```
 aws cloudformation deploy \
@@ -77,14 +77,14 @@ kubectl get nodes
 
 3. Update the `aws-auth-cm.yaml` with your account ID
 
-Take a look at the `aws-auth-cm.yaml`.  This ConfigMap is used to allow your worker nodes to join the cluster. This ConfigMap is also used to add RBAC access to IAM users and roles. 
+Take a look at the `aws-auth-cm.yaml`.  This ConfigMap is used to allow your worker nodes to join the cluster. This ConfigMap is also used to add RBAC access to IAM users and roles.
 
 ```
 ACCOUNTID=$(aws sts get-caller-identity --output text --query 'Account')
 sed -i "" "s/ACCOUNTID/$ACCOUNTID/g" aws-auth-cm.yaml
-``` 
+```
 
-You may have a different `sed` syntax so make sure the ConfigMap has been updated with your account ID.  
+You may have a different `sed` syntax so make sure the ConfigMap has been updated with your account ID.
 
 4.  Apply the ConfigMap yaml and watch the cluster nodes come up
 
@@ -115,7 +115,7 @@ kubectl apply -f calico-hms-clusterrolebinding.yaml
 
 1. Launch a Calico Host Micro-segmentation stack into the Amazon VPC infrastructure using CloudFormation
 
-Let's stand up a simple Amazon Virtual Machine via an Autoscale Group of 1. 
+Let's stand up a simple Amazon Virtual Machine via an Autoscale Group of 1.
 
 ```
 aws cloudformation deploy \
@@ -179,7 +179,7 @@ sudo calicoctl apply -f hep.yaml
 sudo calicoctl get heps -o yaml
 ```
 
-#### Configure Calico Host Micro-segmentation 
+#### Configure Calico Host Micro-segmentation
 
 
 ### Simple Calico Host Micro-segmentation Protection network policy example
