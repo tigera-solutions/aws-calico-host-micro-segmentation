@@ -220,3 +220,4 @@ curl -k https://$IP
 * Managing users or IAM roles for your EKS cluster: https://docs.aws.amazon.com/eks/latest/userguide/add-user-role.html
 * Installing Calico on Amazon EKS: https://docs.aws.amazon.com/eks/latest/userguide/calico.html
 * Understanding Policy Enforcement Options with Calico: https://www.projectcalico.org/understanding-the-policy-enforcement-options-with-calico/
+* Everything You Need To Know About Kubernetes Networking on AWS : https://youtu.be/J1VbZR7j4sI
