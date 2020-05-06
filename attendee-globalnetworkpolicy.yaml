@@ -34,7 +34,7 @@ spec:
           - '80'
           - '443'
   doNotTrack: false
-  applyOnForward: true
-  preDNAT: true
+  applyOnForward: false
+  preDNAT: false
   types:
     - Ingress
