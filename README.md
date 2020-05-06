@@ -214,6 +214,29 @@ curl http://$IP
 curl -k https://$IP
 ```
 
+#### Teardown the Calico Host Micro-segmentation Protection demo stacks
+
+1. Teardown the `calico-demo-hms` hms stack
+
+```
+aws cloudformation delete-stack --stack-name calico-demo-hms
+aws cloudformation wait stack-delete-complete --stack-name calico-demo-hms
+```
+
+2. Teardown the `calico-demo-eks` eks stack
+
+```
+aws cloudformation delete-stack --stack-name calico-demo-eks
+aws cloudformation wait stack-delete-complete --stack-name calico-demo-eks
+```
+
+3. Teardown the `calico-demo` infra stack
+
+```
+aws cloudformation delete-stack --stack-name calico-demo
+aws cloudformation wait stack-delete-complete --stack-name calico-demo
+```
+
 ## References
 
 * Calico Host Micro-segmentation: https://docs.projectcalico.org/getting-started/bare-metal/
