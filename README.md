@@ -152,7 +152,7 @@ ssh -l ubuntu $IP git clone https://github.com/tigera-solutions/aws-calico-host-
 ssh -l ubuntu $IP "sed -i "s/ACCOUNTID/$ACCOUNTID/g" aws-calico-host-micro-segmentation/install-hms.sh"
 ```
 
-4. Install HMS
+4. Install HMS on the vm
 
 ```
 ssh -l ubuntu $IP
@@ -160,7 +160,7 @@ cd aws-calico-host-micro-segmentation/
 sudo ./install-hms.sh
 ```
 
-5. Configure HMS
+5. Start HMS on the vm
 
 ```
 sudo cp calico-felix /etc/default/
@@ -169,7 +169,7 @@ sudo service calico-felix start
 sudo service calico-felix status
 ```
 
-6. Register instance with control plane
+6. Register HMS node with control plane
 
 ```
 sudo calicoctl get heps
@@ -178,9 +178,6 @@ sed -i "s/HOSTIP/$HOSTIP/g" hep.yaml
 sudo calicoctl apply -f hep.yaml
 sudo calicoctl get heps -o yaml
 ```
-
-#### Configure Calico Host Micro-segmentation
-
 
 ### Simple Calico Host Micro-segmentation Protection network policy example
 
