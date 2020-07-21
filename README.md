@@ -25,7 +25,7 @@
 1. Choose an AWS region
 
 ```
-export DEFAULT_AWS_REGION=us-east-1
+export AWS_DEFAULT_REGION=us-east-1
 ```
 
 2. Launch an Amazon VPC infrastructure stack using CloudFormation
