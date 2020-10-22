@@ -1,5 +1,9 @@
 # Getting up and running with Calico Host Micro-segmentation Protection on AWS
 
+This content was built for free training workshops. 
+
+If you're looking for general docs for Calico, we recommend you start [here](http://docs.projectcalico.org/)
+
 ## Agenda
 
 - Calico Host Micro-segmentation Protection deployment considerations
